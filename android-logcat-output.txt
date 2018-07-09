@@ -1,0 +1,13 @@
+07-09 21:29:50.405 13140  2541 E SQLiteLog: (1) near "s": syntax error
+07-09 21:29:50.405 13140  2541 W System.err: android.database.sqlite.SQLiteException: near "s": syntax error (code 1): , while compiling: INSERT INTO project(_id, name, description, budget, color, activated, currency, uuid, updated, deleted ) VALUES(5,'╨Ф╨╛╨╗╨╢╨╜╤Л ╨╝╨╜╨╡','Money deficit because of someone's debts to me',0.0,'9575CD',1,'RUB', '84df7ff319e449af8c01b0764c36e137', '1516911194043', '0' )
+07-09 21:29:50.409 13140  2541 W System.err:    at android.database.sqlite.SQLiteConnection.nativePrepareStatement(Native Method)
+07-09 21:29:50.409 13140  2541 W System.err:    at android.database.sqlite.SQLiteConnection.acquirePreparedStatement(SQLiteConnection.java:889)
+07-09 21:29:50.409 13140  2541 W System.err:    at android.database.sqlite.SQLiteConnection.prepare(SQLiteConnection.java:500)
+07-09 21:29:50.409 13140  2541 W System.err:    at android.database.sqlite.SQLiteSession.prepare(SQLiteSession.java:588)
+07-09 21:29:50.409 13140  2541 W System.err:    at android.database.sqlite.SQLiteProgram.<init>(SQLiteProgram.java:58)
+07-09 21:29:50.409 13140  2541 W System.err:    at android.database.sqlite.SQLiteStatement.<init>(SQLiteStatement.java:31)
+07-09 21:29:50.409 13140  2541 W System.err:    at android.database.sqlite.SQLiteDatabase.executeSql(SQLiteDatabase.java:1677)
+07-09 21:29:50.409 13140  2541 W System.err:    at android.database.sqlite.SQLiteDatabase.execSQL(SQLiteDatabase.java:1608)
+07-09 21:29:50.409 13140  2541 W System.err:    at com.handyapps.expenseiq.activities.ArchiveV2.importTran(ArchiveV2.java:893)
+07-09 21:29:50.409 13140  2541 W System.err:    at com.handyapps.expenseiq.activities.ArchiveV2.importDataV2(ArchiveV2.java:1260)
+07-09 21:29:50.409 13140  2541 W System.err:    at com.handyapps.expenseiq.fragments.settings.NCardListBackupMenuFragment$5.run(NCardListBackupMenuFragment.java:702)

@@ -14,4 +14,3 @@ I wish you luck and hope that this "tool" will help someone!
 ## Exception example
 07-09 21:29:50.405 13140  2541 E SQLiteLog: (1) near "s": syntax error
 07-09 21:29:50.405 13140  2541 W System.err: android.database.sqlite.SQLiteException: near "s": syntax error (code 1): , while compiling: INSERT INTO project(_id, name, description, budget, color, activated, currency, uuid, updated, deleted ) VALUES(<id>,'<name>','it's a bad description',<budget>,'<color>',<activated>,'<currency>', '<uuid>', '<updated>', '<deleted>' )
-<...>

@@ -9,7 +9,7 @@ Fortunately there's one-to-one correspondence from each line in a obfuscated bac
 
 I've been using the app for a very long time and I like it very much, and I actually believe that there's no worthy competitors at Google Play. I hope developers can fix this bugs as soon as possible, because it very frustrating and leads to data loss during database restore. And all this because of tiny apostrophe character that the user had put somewhere in project's description (or in a transaction notes, or somewhere else) a long time ago. It's very strange situation for the product that has been on the market for such a long time, because the escape characters processing is the one of the first things any developer should learn to handle.
 
-I wish you luck and hope that this "tool" will help someone!
+I wish you luck and hope that this tool will help someone!
 
 ## Exception example
 07-09 21:29:50.405 13140  2541 E SQLiteLog: (1) near "s": syntax error

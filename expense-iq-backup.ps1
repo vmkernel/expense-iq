@@ -2,11 +2,8 @@ function Decode-ExpenseIqBackupLine {
     [CmdletBinding()]
     param(
         # Encoded line as it's presented in a backup file
-        [parameter( 
-            Mandatory = $true, 
-            ValueFromPipeline=$true )]
-        [System.String]
-        $Line
+        [parameter( Mandatory = $true, ValueFromPipeline=$true )]
+        [System.String] $Line
     )
 
     begin {  }
@@ -41,11 +38,8 @@ function Decode-ExpenseIqBackupLine {
 function Encode-ExpenseIqBackupLine {
     [CmdletBinding()]
     param(
-        [parameter( 
-            Mandatory = $true,
-            ValueFromPipeline = $true )]
-        [System.String]
-        $Line
+        [parameter( Mandatory = $true, ValueFromPipeline = $true )]
+        [System.String] $Line
     )
 
     begin {  }
@@ -56,7 +50,6 @@ function Encode-ExpenseIqBackupLine {
         $arrBytes = [System.Text.Encoding]::UTF8.GetBytes( $Line );
         
         # Converting the byte array to a HEX string
-        #-join ( $arrBytes | %{ "{0:X2}" -f $_ } )
         $strReversedLine = "";
         for ( $idx = 0; $idx -lt $arrBytes.Count; $idx++ ) {
             $strReversedLine += [System.String]::Format( "{0:X2}", $arrBytes[$idx] );
@@ -73,75 +66,59 @@ function Encode-ExpenseIqBackupLine {
     end {  }
 }
 
+# TODO: Add SQL header
+# As the SQL database scheme in Expense IQ changes from time to time, it would be great
+# to keep up-to-date 'the header' of the output SQL file which automatically creates 
+# SQL tables to be able to upload the decoded file directly to MS SQL Server, BUT
+# for now creation of SQL database header in the decoded output file is disabled as it 
+# doesn't affect logic of the script.
 function Decode-ExpenseIqBackup {
     [CmdletBinding()]
     param(
-        # Encoded backup file (input)
+        # Expense IQ backup file
         [parameter( Mandatory = $true )]
-        [System.String]
-        $SourceFile,
+        [System.String] $InputFile,
         
-        # Decoded sql file (output)
+        # Decoded sql file
         [parameter( Mandatory = $true )]
-        [System.String]
-        $DestinationFile,
-        
-        # Include header in output sql file
-        [parameter( Mandatory = $false )]
-        [switch]
-        $IncludeHeader
+        [System.String] $OutputFile
     )
     
     # Reading the backup file
-    $arrLines = Get-Content -Path $SourceFile;
+    $arrLines = Get-Content -Path $InputFile;
+    
+    # Creating the output file 
+    New-Item -ItemType File -Path $OutputFile | Out-Null;
 
-    # Initializing sql query variable
-    $arrSqlQuery = @();
-    if ( $IncludeHeader.IsPresent ) {
-        # SQL query header that absent in a backup file
-        $arrSqlQuery += @(
-            "create table account (_id integer primary key autoincrement, name text not null, description text not null, start_balance numeric not null, create_date integer not null, monthly_budget numeric null, currency numeric null, position numeric null, default_tran_status text null, exclude_from_total numeric null);",
-            "create table budget (_id integer primary key autoincrement, account_id integer null, category_id integer null, amount numeric not null);",
-            "create table category (_id integer primary key autoincrement, name text not null, description text null, color text not null, type text null, parent_id numeric null);",
-            "create table category_color (_id integer primary key autoincrement, category_id integer null, color_code text not null);",
-            "create table category_tag (_id integer primary key autoincrement, category_id integer not null, name text not null);",
-            "create table currency (_id integer primary key autoincrement, currency_code text null, currency_symbol text null, placement text null, is_default text null, decimal_places integer null, decimal_separator text null, group_separator text null);",
-            "create table currency_symbol (_id integer primary key autoincrement, currency_code text null, currency_symbol text null, is_default text null);",
-            "create table license (_id integer primary key autoincrement, eula_agreed text null, install_date integer null, license_key text null);",
-            "create table passcode (_id integer primary key autoincrement, passcode text null, enabled text null);",
-            "create table project (_id integer primary key autoincrement, name text not null, description text null);",
-            "create table reminder (_id integer primary key autoincrement, tran_id integer not null, title text not null, due_date integer not null, reminder_date integer null, reminder_days integer null, status text null, repeat_id integer null);",
-            "create table repeat (_id integer primary key autoincrement, tran_id integer null, reminder_id integer null, next_date integer null, repeat integer null, repeat_param integer null);",
-            "create table skin (_id integer primary key autoincrement, name text null, header_bg_start text null, header_bg_end text null, h1_left text null, h1_right text null, h2_left text null, h2_right text null, divider_background text null, divider_text text null, summary_background text null, summary_text text null, button_background text null);",
-            "create table system_settings (_id integer primary key autoincrement, version text null);",
-            "create table tran (_id integer primary key autoincrement, account_id integer null, title text not null, amount numeric not null, tran_date integer null, remarks text not null, category_id integer null, status text null, repeat_id integer null, photo_id integer null, split_id integer null, transfer_account_id numeric null)",
-            "create table user_settings (_id integer primary key autoincrement, default_reminder_days integer null, reminder_time text null, currency_symbol text null, currency_code text null, bills_reminder_currency text null, autobackup_time text null, autobackup_enabled text null, account_balance_display text null, forward_period text null, forward_period_bills text null, auto_delete_backup_enabled text null, auto_delete_backup_days integer null, default_reporting_period text null, default_reporting_chart_period text null, sound_fx_enabled text null);"
-        );
+    # Decoding backup file lines and writing them to the output file
+    for ( $idx = 1; $idx -lt $arrLines.Count; $idx++ ) {
+        $strDecodedLine = Decode-ExpenseIqBackupLine -Line $arrLines[$idx];
+        $strDecodedLine | Out-File -Append -Encoding utf8 -LiteralPath $OutputFile
     }
-    
-    # Decoding lines
-    for ( $idxLine = 1; $idxLine -lt $arrLines.Count; $idxLine ++ ) {
-        $strSqlQuery = Decode-ExpenseIqBackupLine -Line $arrLines[$idx];
-        $arrSqlQuery += $strSqlQuery;
-    }
-    
-    # Writing decoded backup file
-    $arrSqlQuery | Out-File -Force -Encoding utf8 -LiteralPath $DestinationFile;
 }
 
 function Encode-ExpenseIqBackup {
     [CmdletBinding()]
     param(
-        # Decoded sql file (input)
+        # Previously decoded SQL file
         [parameter( Mandatory = $true )]
-        [System.String]
-        $SourceFile,
+        [System.String] $InputFile,
         
-        # Encoded backup file (output)
+        # Output file which will be encoded to Expense IQ backup file format
         [parameter( Mandatory = $true )]
-        [System.String]
-        $DestinationFile
+        [System.String] $OutputFile
     )
     
-    # TODO: Implementation
+    # Reading the decoded input file
+    $arrLines = Get-Content -Path $InputFile;
+    
+    # Creating the output file with Expense IQ Backup signature line
+    # NOTE: This is a hardcoded signature, which might be changed in newer versions of Expense IQ
+    "[EASYMONEY_BACKUP_V3]" | Out-File -Encoding default -LiteralPath $OutputFile;
+     
+    # Encoding input file lines and writing them to the output file
+    for ( $idx = 0; $idx -lt $arrLines.Count; $idx++ ) {
+        $strEncodedLine = Encode-ExpenseIqBackupLine -Line $arrLines[$idx];
+        $strEncodedLine | Out-File -Append -Encoding default -LiteralPath $OutputFile;
+    }
 }
